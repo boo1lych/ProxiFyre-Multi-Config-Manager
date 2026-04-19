@@ -1,146 +1,159 @@
 # ProxiFyre Configuration Manager
 
-A modern Windows GUI application for managing [ProxiFyre](https://github.com/wiresock/proxifyre) SOCKS5 proxy configurations with built-in service restart capabilities.
+A modern Windows GUI application for managing [ProxiFyre](https://github.com/wiresock/proxifyre) SOCKS5 proxy configurations with built-in service control, multi-config support, and system tray integration.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Go Version](https://img.shields.io/badge/go-%3E%3D1.16-blue.svg)
+![ProxiFyre Manager Screenshot](https://github.com/user-attachments/assets/36083d12-597d-4a74-9d99-e1725d915b2b)
 
+## ✨ Features
 
-<img width="1280" height="640" alt="Copy of Untitled (2)" src="https://github.com/user-attachments/assets/36083d12-597d-4a74-9d99-e1725d915b2b" />
+- **🎨 Intuitive GUI** — Clean Fyne-based interface with dark/light theme support
+- **🔄 Service Control** — Install, uninstall, start, stop, and restart ProxiFyre as Windows service (with UAC support)
+- **📁 Multi-Config Management** — Create, clone, rename, and switch between multiple proxy configurations
+- **🔌 Multiple Proxies** — Manage unlimited SOCKS5 proxy profiles per config
+- **🎯 Process Exclusions** — Specify applications to bypass the proxy
+- **⚡ Auto-Start on Login** — Toggle Windows autostart via system tray (no admin rights required)
+- **🔍 Path Auto-Detection** — Automatically finds `ProxiFyre.exe` via current dir, PATH, or Windows Service config
+- **💾 Safe Deployment** — Backs up existing config before applying changes
+- **🖥️ System Tray** — Quick access menu with window show/hide, service control, and quit
+- **✅ Real-time Validation** — Ensures configuration integrity before saving
 
-<img width="253" height="152" alt="SysTray" src="https://github.com/user-attachments/assets/f3581825-4827-443e-b335-1512a12b2bf7" />
+---
 
-
-
-## Features
-
-- ✨ **Intuitive GUI** - Easy-to-use graphical interface for configuration management
-- 🔄 **Service Control** - Restart ProxiFyre service directly from the app
-- 📝 **Multiple Proxies** - Manage unlimited proxy configurations
-- 🎯 **Process Exclusions** - Specify applications to bypass the proxy (v2.1.1+)
-- ✅ **Real-time Validation** - Ensures configuration integrity
-- 💾 **Auto-save** - Changes are preserved when switching between proxies
-- 🔐 **Password Support** - Secure handling of proxy credentials
-
-
-
-## Prerequisites
+## 📋 Prerequisites
 
 ### For Users (Running the Application)
 - Windows 10/11
 - [ProxiFyre](https://github.com/wiresock/proxifyre) installed
-- Administrator privileges (required for service restart)
+- Administrator privileges (required only for **Install/Uninstall Service** actions)
 
 ### For Developers (Building from Source)
-- Go 1.16 or later
+- Go 1.20 or later
 - Fyne v2 dependencies
+- Windows SDK (for cross-compilation)
 
-## Installation
+---
+
+## 🚀 Installation
 
 ### Option 1: Download Pre-built Binary (Recommended)
 1. Download the latest release from the [Releases](../../releases) page
-2. Extract `ProxiFyreConfig.exe` to your ProxiFyre installation directory
-3. Run as Administrator
+2. Extract `ProxiFyreManager.exe` to your desired location
+3. (Optional) Place it in the same directory as `ProxiFyre.exe` for auto-path detection
+4. Run the application — no installation required
 
 ### Option 2: Build from Source
 
-#### Windows
+#### Windows (Native)
+```cmd
+# Install Go from https://golang.org/dl/
+go version
 
-1. **Install Go**
-   - Download from [golang.org](https://golang.org/dl/)
-   - Verify installation: `go version`
+# Install Fyne CLI tool
+go install fyne.io/fyne/v2/cmd/fyne@latest
 
-2. **Install Dependencies**
-   ```bash
-   # Install Fyne dependencies for Windows
-   go install fyne.io/fyne/v2/cmd/fyne@latest
-   ```
+# Clone and build
+git clone <repository-url>
+cd ProxiFyre-Multi-Config-Manager
+go mod tidy
 
-3. **Clone and Build**
-   ```bash
-   git clone <repository-url>
-   cd proxifyre-config-manager
+# Build GUI executable (no console window)
+go build -ldflags "-H windowsgui -s -w" -o ProxiFyreManager.exe .
 
-   # Initialize Go module
-   go mod init proxifyre-config
-   go mod tidy
+# Or use Fyne packaging (recommended for distribution)
+fyne package -os windows -appID com.proxifyre.manager -icon ProxiFyre.png -release
+```
 
-   # Build the application
-   go build -o ProxiFyreConfig.exe
+#### Cross-compile from Linux/macOS
+```bash
+GOOS=windows GOARCH=amd64 go build -ldflags "-H windowsgui -s -w" -o ProxiFyreManager.exe .
+```
 
-   # Or build with Windows manifest for proper admin elevation
-   go build -ldflags="-H windowsgui" -o ProxiFyreConfig.exe
-   ```
+---
 
-4. **Place the executable** in the same directory as `ProxiFyre.exe`
-
-## Usage
+## 🎮 Usage
 
 ### Starting the Application
+1. Launch `ProxiFyreManager.exe` (double-click or from CMD)
+2. The application will:
+   - Auto-detect `ProxiFyre.exe` location
+   - Load available configs from `configs/` directory
+   - Create `configs/default.json` if none exist
+3. The window can be minimized to system tray (click `✕` or use tray menu)
 
-1. Navigate to your ProxiFyre installation directory
-2. Right-click `ProxiFyreConfig.exe` and select **Run as Administrator**
-3. The application will automatically load `app-config.json` from the current directory
+### Managing Configurations
+
+| Action | How To |
+|--------|--------|
+| **Add Config** | Click `Add Config` → enter unique name → new empty config created |
+| **Clone Config** | Select config → `Clone Config` → enter new name → copies all settings |
+| **Rename Config** | Select config (except `default`) → `Rename Config` → enter new name |
+| **Remove Config** | Select config → `Remove Config` → confirm (last config cannot be deleted) |
+| **Switch Config** | Use dropdown in top bar → proxy list and editor update automatically |
 
 ### Managing Proxies
 
 #### Adding a New Proxy
-1. Click **Add Proxy** button
-2. Enter application names (one per line):
-   - Use partial names: `firefox` matches `firefox.exe`
-   - Use full paths: `C:\Program Files\WindowsApps\ROBLOX`
-3. Configure SOCKS5 endpoint: `proxy.example.com:1080`
-4. Add credentials (optional): username and password
-5. Select protocols: TCP and/or UDP
-
-#### Editing Existing Proxies
-1. Select a proxy from the list
-2. Modify any settings in the right panel
-3. Changes are auto-saved when switching to another proxy
-
-#### Removing a Proxy
-1. Select the proxy you want to remove
-2. Click **Remove Proxy**
-3. Confirm deletion
-
-### Managing Exclusions
-
-Exclusions allow you to specify applications that should **bypass** the proxy:
-
-1. Scroll to the **Excluded Applications** section
-2. Enter application names or paths (one per line):
+1. Click `Add Proxy`
+2. Enter **Application Names** (one per line):
    ```
    firefox
-   edge
-   C:\Program Files\LocalApp\NotProxiedApp.exe
+   chrome
+   C:\Program Files\WindowsApps\ROBLOX
    ```
-3. Save configuration
+3. Configure **SOCKS5 Endpoint**: `proxy.example.com:1080`
+4. (Optional) Add credentials: username/password
+5. Select protocols: `TCP` and/or `UDP`
+6. Changes auto-save when switching proxies or configs
 
-### Saving Configuration
+#### Editing / Removing Proxies
+- Select a proxy from the list → edit fields on the right → changes save automatically
+- Select proxy → `Remove Proxy` → confirm deletion
 
-#### Save Only
-- Click **Save Configuration**
-- Changes are written to `app-config.json`
-- Service continues running with old configuration
+### Managing Exclusions
+Applications listed here will **bypass** the proxy:
+```
+edge
+discord
+C:\Program Files\LocalApp\NotProxiedApp.exe
+```
+Enter one app per line in the **Global Excluded Applications** section.
 
-#### Save and Restart Service
-- Click **Save & Restart Service**
-- Configuration is saved
-- ProxiFyre service is automatically restarted
-- New configuration takes effect immediately
+### Saving & Applying Changes
 
-### Reloading Configuration
+| Button | Action |
+|--------|--------|
+| **Save Configuration** | Writes changes to `configs/<name>.json` only |
+| **Save & Restart Service** 🔵 | Saves config + deploys to ProxiFyre dir + restarts service (changes take effect immediately) |
+| **Reload from File** | Discards unsaved changes and reloads from disk |
 
-- Click **Reload from File** to discard unsaved changes
-- Useful for reverting to the last saved state
+> 💡 **Tip**: Use **Save & Restart Service** to apply changes without manual service restart.
 
-## Configuration File Format
+### Service Management
 
-The application manages `app-config.json` in the following format:
+| Button | Description | Requires Admin |
+|--------|-------------|---------------|
+| **Install Service** | Registers ProxiFyre as Windows service + starts it | ✅ Yes (UAC prompt) |
+| **Uninstall Service** | Stops and removes the service | ✅ Yes (UAC prompt) |
+
+> ⚠️ Service actions trigger a Windows UAC prompt. Click **Yes** to proceed.
+
+### System Tray Menu
+Right-click the tray icon (near clock) for quick actions:
+- `Show Window` — Restore the main window
+- `☐/✓ Launch on Startup` — Toggle Windows autostart (HKCU registry, no admin needed)
+- `Install/Uninstall Service` — Quick access to service management
+- `Quit` — Exit the application
+
+---
+
+## ⚙️ Configuration File Format
+
+Configs are stored in `configs/<name>.json`:
 
 ```json
 {
   "logLevel": "Error",
+  "proxifyrePath": "C:\\ProxiFyre\\ProxiFyre.exe",
   "proxies": [
     {
       "appNames": ["chrome", "firefox"],
@@ -150,126 +163,184 @@ The application manages `app-config.json` in the following format:
       "supportedProtocols": ["TCP", "UDP"]
     }
   ],
-  "excludes": [
-    "edge",
-    "localservice.exe"
-  ]
+  "excludes": ["edge", "localservice.exe"]
 }
 ```
 
-### Configuration Options
+### Field Reference
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `logLevel` | string | Logging verbosity: `Error`, `Warning`, `Info`, `Debug`, `All` |
+| `proxifyrePath` | string | (Optional) Full path to `ProxiFyre.exe` |
 | `proxies` | array | List of proxy configurations |
-| `appNames` | array | Application names or paths to proxy |
+| `appNames` | array | Application names/paths to route through proxy |
 | `socks5ProxyEndpoint` | string | Proxy server address and port |
-| `username` | string | Optional proxy authentication username |
-| `password` | string | Optional proxy authentication password |
-| `supportedProtocols` | array | Protocols to proxy: `TCP`, `UDP`, or both |
-| `excludes` | array | Applications to bypass the proxy |
+| `username` / `password` | string | Optional SOCKS5 authentication |
+| `supportedProtocols` | array | `TCP`, `UDP`, or both |
+| `excludes` | array | Applications to **bypass** the proxy |
 
-## Troubleshooting
+---
 
-### Application won't start
-- Ensure you're running as Administrator
-- Check that `app-config.json` exists (it will be created if missing)
-- Verify ProxiFyre is installed in the same directory
+## 🔧 Advanced Usage
 
-### Service restart fails
-- Confirm `ProxiFyre.exe` exists in the same directory
-- Verify you have Administrator privileges
-- Check if ProxiFyre service is installed: `ProxiFyre.exe install`
+### ProxiFyre Path Management
+If auto-detection fails:
+1. Enter the full path to `ProxiFyre.exe` in the **ProxiFyre Path** field
+2. Click `Apply` to save
+3. Or click `Detect Path` to re-run auto-detection
 
-### Configuration not taking effect
-- Use **Save & Restart Service** instead of just **Save Configuration**
-- Verify the service is running: `sc query ProxiFyre`
-- Check ProxiFyre logs in `/logs` directory
+### Deployment Behavior
+When using **Save & Restart Service**:
+1. Current config is saved to `configs/<name>.json`
+2. Config is copied to ProxiFyre directory as `app-config.json` (with backup)
+3. Service is restarted to apply changes
 
-### Proxy not working for specific applications
-- Ensure application names are correct (case-insensitive)
-- For UWP apps, use the full path to the WindowsApps folder
-- Check if the application is in the exclusions list
-
-## Advanced Usage
-
-### Running from Different Directory
-
-If you want to manage a config file in a different location:
-
-```bash
-# Edit the configPath variable in main.go before building
-var configPath = "C:\\Path\\To\\app-config.json"
+### Logging
+Application logs to console during development. For production builds (`-H windowsgui`), use:
+```go
+log.Printf("[Service] Your message here")
 ```
+Logs appear in Windows Event Viewer or can be redirected to file.
 
-### Multiple ProxiFyre Instances
+### Autostart Mechanism
+- Uses `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (current user only)
+- No admin rights required
+- Toggle via system tray menu → changes apply immediately
 
-You can manage multiple ProxiFyre configurations by:
-1. Creating separate folders for each configuration
-2. Placing a copy of `ProxiFyreConfig.exe` in each folder
-3. Each instance will manage its own `app-config.json`
+---
 
-## Development
+## 🛠️ Troubleshooting
 
-### Project Structure
+| Issue | Solution |
+|-------|----------|
+| **App won't start** | Ensure `ProxiFyre.png` is in the same directory; run from CMD to see errors |
+| **Service install fails** | Click **Yes** in UAC prompt; verify you have admin rights |
+| **Config not applying** | Use **Save & Restart Service**, not just Save; check service status via `sc query ProxiFyre` |
+| **Proxy not working for app** | Verify app name/path; check exclusions list; ensure protocol (TCP/UDP) matches app traffic |
+| **Path detection fails** | Manually enter full path to `ProxiFyre.exe` and click Apply |
+| **Tray icon missing** | Ensure app is built with Fyne desktop driver; check Windows notification area settings |
 
+---
+
+## 📦 Distribution
+
+### Using `build.bat` (Windows)
+A ready-to-use build script is included:
+```cmd
+build.bat
 ```
-proxifyre-config-manager/
-├── main.go           # Main application code
-├── go.mod            # Go module dependencies
-├── go.sum            # Dependency checksums
-├── ProxyFyre.png     # App Icon
-└── README.md         # This file
-```
+Creates `dist/` folder with:
+- `ProxiFyreManager.exe` (GUI build, no console)
+- `ProxiFyre.png` (icon)
+- `configs/default.json` (starter config)
+- `README.txt` + `version.txt`
 
-### Building for Release
-
-```bash
-# Build optimized binary
-go build -ldflags="-s -w -H windowsgui" -o ProxiFyreConfig.exe
-
-# Create release package
+### Manual Packaging
+```cmd
 mkdir release
-copy ProxiFyreConfig.exe release\
+copy ProxiFyreManager.exe release\
+copy ProxiFyre.png release\
 copy README.md release\
 ```
 
-### Contributing
+### Code Signing (Optional)
+For enterprise deployment, sign the executable:
+```cmd
+signtool sign /fd SHA256 /a /tr http://timestamp.digicert.com /td SHA256 ProxiFyreManager.exe
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+---
 
+## 🧑‍💻 Development
+
+### Project Structure
+```
+ProxiFyre-Multi-Config-Manager/
+├── main.go              # Main application code
+├── go.mod / go.sum      # Go module dependencies
+├── ProxiFyre.png        # Application icon
+├── build.bat            # Windows build script
+├── configs/             # Runtime config storage (gitignored)
+└── README.md            # This file
+```
+
+### Key Components
+| File/Function | Purpose |
+|---------------|---------|
+| `ConfigManager` | Manages multiple configs with load/save/switch logic |
+| `updateSystemTrayMenu()` | Dynamically builds tray menu with autostart status |
+| `runElevated()` | Executes commands with UAC prompt via PowerShell |
+| `DeployConfigToProxiFyre()` | Safely copies config to ProxiFyre directory with backup |
+| `resolveProxiFyrePath()` | Multi-method path detection (dir, PATH, service config) |
+
+### Adding New Features
+1. Follow existing Fyne widget patterns
+2. Use `dialog.Show*` for user feedback
+3. Log service actions with `log.Printf("[Service] ...")`
+4. Test UAC flows with non-admin user account
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! Please:
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push and open a Pull Request
 
-## License
+### Code Guidelines
+- Use `fmt.Errorf` with `%w` for error wrapping
+- Keep UI logic in `main()`; extract helpers to functions
+- Test service actions on clean Windows VM
+- Update this README for user-facing changes
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
 
-## Acknowledgments
+## 📜 License
+MIT License — see [LICENSE](LICENSE) file for details.
 
-- Built with [Fyne](https://fyne.io/) - A cross-platform GUI toolkit for Go
+---
+
+## 🙏 Acknowledgments
+- Built with [Fyne](https://fyne.io/) — Cross-platform Go GUI toolkit
 - Created for [ProxiFyre](https://github.com/wiresock/proxifyre) by Wiresock
+- Icons and design inspired by modern Windows applications
 
-## Support
+---
 
-For issues related to:
-- **This GUI application**: Open an issue in this repository
-- **ProxiFyre itself**: Visit the [ProxiFyre repository](https://github.com/wiresock/proxifyre)
+## 🆘 Support
+| Issue Type | Where to Report |
+|------------|----------------|
+| GUI application bugs | [This repository → Issues](../../issues) |
+| ProxiFyre core issues | [ProxiFyre repository](https://github.com/wiresock/proxifyre) |
+| Feature requests | [Discussions tab](../../discussions) |
 
-## Changelog
+> ℹ️ **Note**: This is an unofficial GUI tool for ProxiFyre. For official ProxiFyre documentation and support, visit the [official repository](https://github.com/wiresock/proxifyre).
+
+---
+
+## 🔄 Changelog
+
+### v2.0.0 (Current)
+- ✨ **Multi-config support**: Add, clone, rename, remove configs via UI
+- 🚀 **Autostart toggle**: Enable/disable Windows login launch from system tray
+- 🔐 **UAC integration**: Proper admin elevation for service install/uninstall
+- 🎨 **UI polish**: Highlighted `Save & Restart` button, auto-select first proxy on config switch
+- 🔍 **Smart path detection**: Finds ProxiFyre via dir, PATH, or Windows Service config
+- 💾 **Safe deployment**: Backs up `app-config.json` before overwriting
+- 🖥️ **System tray menu**: Dynamic menu with live autostart status
+- 🛠️ **Build script**: `build.bat` for one-click release packaging
 
 ### v1.0.0 (Initial Release)
 - ✨ Full configuration management GUI
 - 🔄 Service restart integration
-- 📝 Multiple proxy support
-- 🎯 Process exclusion management (v2.1.1+ feature)
+- 📝 Multiple proxy support per config
+- 🎯 Process exclusion management
 - 💾 Real-time configuration validation
 - 🔐 Secure password handling
 
 ---
 
-**Note**: This is an unofficial GUI tool for ProxiFyre. For the official ProxiFyre documentation and support, please visit the [official repository](https://github.com/wiresock/proxifyre).
+*Last updated: April 2026*  
+*Compatible with ProxiFyre v1.0+*
