@@ -84,18 +84,11 @@ echo %CHECK% Created: version.txt
 (
     echo ProxiFyre Configuration Manager
     echo ================================
-    echo.
-    echo Запустите от имени администратора для установки/удаления службы.
-    echo.
+    echo
     echo Файлы:
     echo - %APP_NAME%.exe      : Основное приложение
     echo - configs/            : Папка с конфигурациями
     echo - %ICON_FILE%         : Иконка приложения ^(опционально^)
-    echo.
-    echo Горячие клавиши:
-    echo - Ctrl+Q : Выход
-    echo.
-    echo Поддержка: rogverse.fyi
 ) > "%OUTPUT_DIR%\README.txt"
 echo %CHECK% Created: README.txt
 
